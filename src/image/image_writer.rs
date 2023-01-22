@@ -2,8 +2,8 @@ use std::fs::OpenOptions;
 use std::io::{Error, Write};
 use std::path::Path;
 
-use crate::color::ColorRgb8;
-use crate::image_buffer::ImageBuffer;
+use crate::core::color::ColorRgb8;
+use crate::image::image_buffer::ImageBuffer;
 
 pub struct ImageFileWriter<'a> {
     pub output_file_path: &'a Path,

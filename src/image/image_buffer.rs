@@ -1,5 +1,5 @@
-use crate::color::ColorRgbF;
-use crate::rehnda_math::Vec3Ext;
+use crate::core::color::ColorRgbF;
+use crate::core::rehnda_math::Vec3Ext;
 
 pub struct ImageBuffer {
     pub image_width: usize,
