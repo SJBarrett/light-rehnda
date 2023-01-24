@@ -19,6 +19,7 @@ pub trait Vec3Ext {
     fn random_vec_in_unit_disk() -> Vec3f;
     fn random_vec_in_range(min: f32, max: f32) -> Vec3f;
     fn random_unit_vector() -> Vec3f;
+    fn reflect(&self, normal: Vec3f) -> Vec3f;
 }
 
 impl Vec3Ext for Vec3 {
@@ -55,6 +56,10 @@ impl Vec3Ext for Vec3 {
 
     fn random_unit_vector() -> Vec3f {
         Self::random_vec_in_unit_sphere()
+    }
+
+    fn reflect(&self, normal: Vec3f) -> Vec3f {
+        *self - 2.0 * self.dot(normal) * normal
     }
 }
 

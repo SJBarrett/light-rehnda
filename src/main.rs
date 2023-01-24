@@ -17,6 +17,7 @@ use crate::hittable::sphere::Sphere;
 use crate::image::image_buffer::ImageBuffer;
 use crate::image::image_writer::ImageFileWriter;
 use crate::material::lambertian::LambertianMaterial;
+use crate::material::metal::MetalMaterial;
 use crate::scene::camera::{Camera, CameraCreateInfo};
 use crate::scene::Scene;
 use crate::texture::solid::SolidTexture;
@@ -81,6 +82,10 @@ fn test_scene() -> Scene {
     let sphere_mat = Arc::new(LambertianMaterial {
         texture: Arc::new(SolidTexture { albedo: ColorRgbF::new(0.7, 0.1, 0.7) }),
     });
+    let metal_mat = Arc::new(MetalMaterial {
+        albedo: ColorRgbF::new(0.1, 0.6, 0.2),
+        fuzz: 0.0,
+    });
     let sphere_mat_2 = Arc::new(LambertianMaterial {
         texture: Arc::new(SolidTexture { albedo: ColorRgbF::new(0.1, 0.6, 0.2) }),
     });
@@ -92,7 +97,7 @@ fn test_scene() -> Scene {
     let sphere_2 = Sphere {
         centre: Point3f::new(0.0, 2.0, 0.0),
         radius: 2.0,
-        material: sphere_mat_2,
+        material: metal_mat,
     };
     let objects: Vec<Arc<dyn Hittable>> = vec![Arc::new(sphere_1), Arc::new(sphere_2)];
 
