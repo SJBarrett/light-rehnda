@@ -16,6 +16,7 @@ pub trait Vec3Ext {
     fn is_near_zero(&self) -> bool;
     fn unit_vector(&self) -> Vec3f;
     fn random_vec_in_unit_sphere() -> Vec3f;
+    fn random_vec_in_unit_disk() -> Vec3f;
     fn random_vec_in_range(min: f32, max: f32) -> Vec3f;
     fn random_unit_vector() -> Vec3f;
 }
@@ -28,6 +29,15 @@ impl Vec3Ext for Vec3 {
 
     fn unit_vector(&self) -> Vec3f {
         *self / self.length()
+    }
+
+    fn random_vec_in_unit_disk() -> Vec3f {
+        loop {
+            let candidate = Vec3f::new(random_in_range(-1.0, 1.0), random_in_range(-1.0, 1.0), 0.0);
+            if candidate.length_squared() < 1.0 {
+                return candidate;
+            }
+        }
     }
 
     fn random_vec_in_unit_sphere() -> Vec3f {

@@ -1,6 +1,7 @@
 use crate::core::color::ColorRgbF;
 use crate::core::rehnda_math::Vec3Ext;
 
+#[derive(Debug, Clone)]
 pub struct ImageBuffer {
     pub image_width: usize,
     pub image_height: usize,

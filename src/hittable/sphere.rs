@@ -1,13 +1,16 @@
 use std::f32::consts::PI;
+use std::sync::Arc;
 use crate::acceleration::aabb::Aabb;
 use crate::core::ray::Ray;
 use crate::core::rehnda_math::{Point3f, Vec3f};
 use crate::hittable::{HitResult, Hittable};
+use crate::material::Material;
 use crate::texture::Uv;
 
 pub struct Sphere {
     pub centre: Point3f,
     pub radius: f32,
+    pub material: Arc<dyn Material>,
 }
 
 impl Hittable for Sphere {
@@ -46,6 +49,7 @@ impl Hittable for Sphere {
             t: root,
             front_face,
             uv: Sphere::get_unit_sphere_uv(&outward_normal),
+            material: &*self.material,
         })
     }
 

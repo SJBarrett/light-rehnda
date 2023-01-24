@@ -1,3 +1,4 @@
+use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 use crate::core::ray::Ray;
 use crate::core::rehnda_math::{Vec3f, Vec3Ext};
@@ -6,7 +7,13 @@ use crate::material::{Material, Scatter};
 use crate::texture::Texture;
 
 pub struct LambertianMaterial<T: Texture> {
-    texture: Arc<T>,
+    pub(crate) texture: Arc<T>,
+}
+
+impl<T: Texture> Debug for LambertianMaterial<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "LambertianMaterial")
+    }
 }
 
 impl<T: Texture> Material for LambertianMaterial<T> {

@@ -34,6 +34,7 @@ impl BvhNode {
                 }
             },
             _ => {
+                // TODO only sort slice
                 objects.sort_by(comparator_func);
                 let mid = start + objects_span / 2;
                 (

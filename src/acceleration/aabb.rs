@@ -37,9 +37,9 @@ impl Aabb {
             box_0.min_corner.z.min(box_1.min_corner.z),
         );
         let max_corner = Point3f::new(
-            box_0.max_corner.x.min(box_1.max_corner.x),
-            box_0.max_corner.y.min(box_1.max_corner.y),
-            box_0.max_corner.z.min(box_1.max_corner.z),
+            box_0.max_corner.x.max(box_1.max_corner.x),
+            box_0.max_corner.y.max(box_1.max_corner.y),
+            box_0.max_corner.z.max(box_1.max_corner.z),
         );
         Aabb {
             min_corner,
