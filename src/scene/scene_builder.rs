@@ -9,9 +9,18 @@ use crate::material::lambertian::LambertianMaterial;
 use crate::material::metal::MetalMaterial;
 use crate::scene::camera::{Camera, CameraCreateInfo};
 use crate::scene::Scene;
+use crate::scene::settings::{CameraSettings, RehndaSettings, SceneName};
 use crate::texture::solid::SolidTexture;
 
-pub fn three_spheres_scene() -> Scene {
+pub fn load_scene(settings: &RehndaSettings) -> Scene {
+    match settings.scene {
+        SceneName::RandomSpheres => random_spheres_scene(&settings.camera_settings),
+        SceneName::ThreeSpheres => three_spheres_scene(&settings.camera_settings),
+        _ => unimplemented!("Unsupported scene name!")
+    }
+}
+
+fn three_spheres_scene(camera_settings: &CameraSettings) -> Scene {
     let mut objects: Vec<Arc<dyn Hittable>> = Vec::new();
 
     let ground_material = Arc::new(LambertianMaterial::new_with_solid_color(&ColorRgbF::new(0.8, 0.8, 0.0)));
@@ -51,8 +60,8 @@ pub fn three_spheres_scene() -> Scene {
         look_at: Point3f::new(0.0, 0.0, -1.0),
         up: Point3f::new(0.0, 1.0, 0.0),
         vertical_fov_degrees: 100.0,
-        aspect_ratio: 16.0 / 9.0,
-        aperture: 0.01,
+        aspect_ratio: camera_settings.aspect_ratio(),
+        aperture: camera_settings.aperture,
         focus_distance: 1.0,
         time_0: 0.0,
         time_1: 1.0,
@@ -65,7 +74,7 @@ pub fn three_spheres_scene() -> Scene {
     }
 }
 
-pub fn random_spheres_scene() -> Scene {
+fn random_spheres_scene(camera_settings: &CameraSettings) -> Scene {
     let mut objects: Vec<Arc<dyn Hittable>> = Vec::new();
     let ground_material = Arc::new(LambertianMaterial {
         texture: Arc::new(SolidTexture { albedo: ColorRgbF::new(0.5, 0.5, 0.5)})
@@ -142,8 +151,8 @@ pub fn random_spheres_scene() -> Scene {
         look_at: Point3f::splat(0.0),
         up: Point3f::new(0.0, 1.0, 0.0),
         vertical_fov_degrees: 20.0,
-        aspect_ratio: 16.0 / 9.0,
-        aperture: 0.05,
+        aspect_ratio: camera_settings.aspect_ratio(),
+        aperture: camera_settings.aperture,
         focus_distance: 10.0,
         time_0: 0.0,
         time_1: 1.0,

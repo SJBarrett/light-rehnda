@@ -1,4 +1,3 @@
-use std::num::NonZeroUsize;
 use std::path::Path;
 use std::sync::Arc;
 use std::thread;
@@ -7,6 +6,8 @@ use std::time::Instant;
 use log::info;
 
 use simplelog::*;
+use clap::Parser;
+use serde::de::Unexpected::Str;
 use crate::acceleration::bvh::BvhNode;
 use crate::aggregator::{AggregationConfig, sample_pixels};
 
@@ -21,7 +22,8 @@ use crate::material::lambertian::LambertianMaterial;
 use crate::material::metal::MetalMaterial;
 use crate::scene::camera::{Camera, CameraCreateInfo};
 use crate::scene::Scene;
-use crate::scene::scene_builder::{random_spheres_scene, three_spheres_scene};
+use crate::scene::scene_builder::load_scene;
+use crate::scene::settings::RehndaSettings;
 use crate::texture::solid::SolidTexture;
 
 mod acceleration;
@@ -33,30 +35,36 @@ mod material;
 mod scene;
 mod texture;
 
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    #[arg(short, long)]
+    output_file: Option<String>,
+    #[arg(short, long)]
+    settings_file: String,
+}
+
 fn main() {
     TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed, ColorChoice::Auto).unwrap();
-    let aspect_ratio = 3.0 / 2.0;
-    let image_width = 1200;
-    let image_height = (image_width as f32 / aspect_ratio) as usize;
-
-    let test_scene = random_spheres_scene();
-    let num_samples = 500 / 16;
-    let num_threads = thread::available_parallelism().map(NonZeroUsize::get).unwrap_or(1);
+    let args = Args::parse();
+    let settings = RehndaSettings::from_file(Path::new(&args.settings_file));
+    info!("Rendering at resolution: {}x{}", settings.image_width, settings.image_height());
+    let scene = load_scene(&settings);
 
     let aggregation_config = AggregationConfig {
-        samples_per_pixel: num_samples,
-        max_sample_depth: 30,
+        samples_per_pixel: settings.num_samples_per_thread(),
+        max_sample_depth: settings.max_depth,
     };
-    info!("Rendering using {} threads", num_threads);
+    info!("Rendering using {} threads", settings.num_threads());
     let mut render_thread_handles: Vec<JoinHandle<ImageBuffer>> = Vec::new();
-    for _i in 1..num_threads {
-        render_thread_handles.push(spawn_render_thread(aggregation_config, test_scene.clone(), image_width, image_height));
+    for _i in 1..settings.num_threads() {
+        render_thread_handles.push(spawn_render_thread(aggregation_config, scene.clone(), settings.image_width, settings.image_height()));
     }
-    let mut main_buffer = ImageBuffer::new(image_width, image_height);
+    let mut main_buffer = ImageBuffer::new(settings.image_width, settings.image_height());
 
     let render_start = Instant::now();
     info!("Main thread starting rendering");
-    sample_pixels(&aggregation_config, &test_scene, &mut main_buffer, true);
+    sample_pixels(&aggregation_config, &scene, &mut main_buffer, true);
     info!("Main thread done. Main thread took: {:?}", render_start.elapsed());
 
     render_thread_handles.into_iter().for_each(|x| main_buffer.add_buffer(&x.join().unwrap()));
@@ -64,11 +72,12 @@ fn main() {
     let render_duration = render_start.elapsed();
     info!("All threads done. Took {:?}", render_duration);
 
-    let out_path = Path::new("out.ppm");
+    let output_file_str = args.output_file.as_ref().or(settings.output_file.as_ref());
+    let out_path = output_file_str.map_or(Path::new("out.ppm"), Path::new);
     let image_writer = ImageFileWriter {
         output_file_path: out_path,
     };
-    image_writer.write_image_buffer_to_ppm(&main_buffer, num_samples * num_threads).unwrap();
+    image_writer.write_image_buffer_to_ppm(&main_buffer, settings.num_samples_per_thread() * settings.num_threads()).unwrap();
     info!("Done!");
 }
 
