@@ -1,13 +1,27 @@
 use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
+use crate::core::color::ColorRgbF;
 use crate::core::ray::Ray;
 use crate::core::rehnda_math::{Vec3f, Vec3Ext};
 use crate::hittable::HitResult;
 use crate::material::{Material, Scatter};
+use crate::texture::solid::SolidTexture;
 use crate::texture::Texture;
 
 pub struct LambertianMaterial<T: Texture> {
     pub(crate) texture: Arc<T>,
+}
+
+impl LambertianMaterial<SolidTexture> {
+    pub fn new_with_solid_color(color: &ColorRgbF) -> LambertianMaterial<SolidTexture> {
+        let texture = SolidTexture {
+            albedo: *color,
+        };
+        let tex_ref = Arc::new(texture);
+        LambertianMaterial {
+            texture: tex_ref,
+        }
+    }
 }
 
 impl<T: Texture> Debug for LambertianMaterial<T> {

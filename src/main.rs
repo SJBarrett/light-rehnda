@@ -16,10 +16,12 @@ use crate::hittable::Hittable;
 use crate::hittable::sphere::Sphere;
 use crate::image::image_buffer::ImageBuffer;
 use crate::image::image_writer::ImageFileWriter;
+use crate::material::dielectric::DielectricMaterial;
 use crate::material::lambertian::LambertianMaterial;
 use crate::material::metal::MetalMaterial;
 use crate::scene::camera::{Camera, CameraCreateInfo};
 use crate::scene::Scene;
+use crate::scene::scene_builder::{random_spheres_scene, three_spheres_scene};
 use crate::texture::solid::SolidTexture;
 
 mod acceleration;
@@ -33,12 +35,12 @@ mod texture;
 
 fn main() {
     TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed, ColorChoice::Auto).unwrap();
-    let aspect_ratio = 16.0 / 9.0;
-    let image_width = 600;
+    let aspect_ratio = 3.0 / 2.0;
+    let image_width = 1200;
     let image_height = (image_width as f32 / aspect_ratio) as usize;
 
-    let test_scene = test_scene();
-    let num_samples = 4;
+    let test_scene = random_spheres_scene();
+    let num_samples = 500 / 16;
     let num_threads = thread::available_parallelism().map(NonZeroUsize::get).unwrap_or(1);
 
     let aggregation_config = AggregationConfig {
@@ -86,6 +88,10 @@ fn test_scene() -> Scene {
         albedo: ColorRgbF::new(0.1, 0.6, 0.2),
         fuzz: 0.0,
     });
+    // TODO FIX DIELECTRIC
+    let dielectric_mat = Arc::new(DielectricMaterial {
+        refractive_index: 1.5,
+    });
     let sphere_mat_2 = Arc::new(LambertianMaterial {
         texture: Arc::new(SolidTexture { albedo: ColorRgbF::new(0.1, 0.6, 0.2) }),
     });
@@ -97,7 +103,7 @@ fn test_scene() -> Scene {
     let sphere_2 = Sphere {
         centre: Point3f::new(0.0, 2.0, 0.0),
         radius: 2.0,
-        material: metal_mat,
+        material: dielectric_mat,
     };
     let objects: Vec<Arc<dyn Hittable>> = vec![Arc::new(sphere_1), Arc::new(sphere_2)];
 

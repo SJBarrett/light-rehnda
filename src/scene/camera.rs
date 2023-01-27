@@ -28,6 +28,7 @@ pub struct CameraCreateInfo {
     pub time_1: f32
 }
 
+
 impl Camera {
     pub fn new(create_info: &CameraCreateInfo) -> Camera {
         let theta = create_info.vertical_fov_degrees.to_radians();

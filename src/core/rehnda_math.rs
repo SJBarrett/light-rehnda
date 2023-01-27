@@ -1,15 +1,18 @@
 use glam::{Vec3};
-use rand::prelude::*;
 
 pub type Vec3f = Vec3;
 pub type Point3f = Vec3;
 
 pub fn random_int_in_range(min: i32, max: i32) -> i32 {
-    (min as f32 + random::<f32>() * (max - min) as f32) as i32
+    (min as f32 + rand::random::<f32>() * (max - min) as f32) as i32
 }
 
 pub fn random_in_range(min: f32, max: f32) -> f32 {
-    min + random::<f32>() * (max - min)
+    min + rand::random::<f32>() * (max - min)
+}
+
+pub fn random() -> f32 {
+    rand::random::<f32>()
 }
 
 pub trait Vec3Ext {
@@ -20,6 +23,7 @@ pub trait Vec3Ext {
     fn random_vec_in_range(min: f32, max: f32) -> Vec3f;
     fn random_unit_vector() -> Vec3f;
     fn reflect(&self, normal: Vec3f) -> Vec3f;
+    fn refract(&self, normal: Vec3f, refraction_ratio: f32) -> Vec3f;
 }
 
 impl Vec3Ext for Vec3 {
@@ -45,7 +49,7 @@ impl Vec3Ext for Vec3 {
         loop {
             let candidate = Self::random_vec_in_range(-1f32, 1f32);
             if candidate.length_squared() < 1f32 {
-                return candidate
+                return candidate;
             }
         }
     }
@@ -60,6 +64,13 @@ impl Vec3Ext for Vec3 {
 
     fn reflect(&self, normal: Vec3f) -> Vec3f {
         *self - 2.0 * self.dot(normal) * normal
+    }
+
+    fn refract(&self, normal: Vec3f, refraction_ratio: f32) -> Vec3f {
+        let cos_theta = (-*self).dot(normal).min(1.0);
+        let r_out_perp = refraction_ratio * (*self + cos_theta * normal);
+        let r_out_parallel = -(((1.0 - r_out_perp.length_squared()).abs()).sqrt()) * normal;
+        r_out_perp + r_out_parallel
     }
 }
 
