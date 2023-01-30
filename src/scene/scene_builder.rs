@@ -10,6 +10,8 @@ use crate::material::metal::MetalMaterial;
 use crate::scene::camera::{Camera, CameraCreateInfo};
 use crate::scene::Scene;
 use crate::scene::settings::{CameraSettings, RehndaSettings, SceneName};
+use crate::texture::checker::CheckerTexture;
+use crate::texture::noise::NoiseTexture;
 use crate::texture::solid::SolidTexture;
 
 pub fn load_scene(settings: &RehndaSettings) -> Scene {
@@ -23,10 +25,11 @@ pub fn load_scene(settings: &RehndaSettings) -> Scene {
 fn three_spheres_scene(camera_settings: &CameraSettings) -> Scene {
     let mut objects: Vec<Arc<dyn Hittable>> = Vec::new();
 
-    let ground_material = Arc::new(LambertianMaterial::new_with_solid_color(&ColorRgbF::new(0.8, 0.8, 0.0)));
+    let checker_texture = Arc::new(CheckerTexture::new(Arc::new(SolidTexture::new(0.2, 0.3, 0.1)), Arc::new(SolidTexture::new(0.9, 0.9, 0.9))));
+    let ground_material = Arc::new(LambertianMaterial::new(checker_texture));
     let centre_material = Arc::new(LambertianMaterial::new_with_solid_color(&ColorRgbF::new(0.7, 0.3, 0.3)));
     let left_material = Arc::new(DielectricMaterial { refractive_index: 1.5 });
-    let right_material = Arc::new(MetalMaterial { albedo: ColorRgbF::new(0.8, 0.6, 0.2), fuzz: 1.0});
+    let right_material = Arc::new(MetalMaterial { albedo: ColorRgbF::new(0.8, 0.6, 0.2), fuzz: 0.7});
 
     objects.push(Arc::new(Sphere {
         centre: Point3f::new(0.0, -100.5, -1.0),
@@ -43,11 +46,6 @@ fn three_spheres_scene(camera_settings: &CameraSettings) -> Scene {
         centre: Point3f::new(-1.0, 0.0, -1.0),
         radius: 0.5,
         material: left_material.clone(),
-    }));
-    objects.push(Arc::new(Sphere {
-        centre: Point3f::new(-1.0, 0.0, -1.0),
-        radius: -0.4,
-        material: left_material,
     }));
     objects.push(Arc::new(Sphere {
         centre: Point3f::new(1.0, 0.0, -1.0),
@@ -77,7 +75,7 @@ fn three_spheres_scene(camera_settings: &CameraSettings) -> Scene {
 fn random_spheres_scene(camera_settings: &CameraSettings) -> Scene {
     let mut objects: Vec<Arc<dyn Hittable>> = Vec::new();
     let ground_material = Arc::new(LambertianMaterial {
-        texture: Arc::new(SolidTexture { albedo: ColorRgbF::new(0.5, 0.5, 0.5)})
+        texture: Arc::new(NoiseTexture { scale: 4.0 })
     });
     objects.push(Arc::new(Sphere {
         centre: Point3f::new(0.0, -1000.0, 0.0),

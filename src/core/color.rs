@@ -1,7 +1,7 @@
-use glam::Vec3;
+use glam::Vec3A;
 
 /// Color type where colors are encoded as a unit interval (0 to 1)
-pub type ColorRgbF = Vec3;
+pub type ColorRgbF = Vec3A;
 
 /// Color represented by an unsigned 8 bit integer per channel
 pub struct ColorRgb8 {

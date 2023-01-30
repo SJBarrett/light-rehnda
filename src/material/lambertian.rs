@@ -9,7 +9,15 @@ use crate::texture::solid::SolidTexture;
 use crate::texture::Texture;
 
 pub struct LambertianMaterial<T: Texture> {
-    pub(crate) texture: Arc<T>,
+    pub texture: Arc<T>,
+}
+
+impl<T: Texture> LambertianMaterial<T> {
+    pub fn new(texture: Arc<T>) -> LambertianMaterial<T> {
+        LambertianMaterial {
+            texture,
+        }
+    }
 }
 
 impl LambertianMaterial<SolidTexture> {

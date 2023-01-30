@@ -14,3 +14,4 @@ rand = "0.8"
 indicatif = "0.17"
 ron = "0.8"
 serde = { version = "1", features = ["derive"]}
+lazy_static = "1.4"

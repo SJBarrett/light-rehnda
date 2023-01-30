@@ -194,6 +194,7 @@ dependencies = [
  "clap",
  "glam",
  "indicatif",
+ "lazy_static",
  "log",
  "rand",
  "ron",

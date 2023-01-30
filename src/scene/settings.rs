@@ -3,6 +3,7 @@ use std::io::Read;
 use std::num::NonZeroUsize;
 use std::path::Path;
 use std::thread;
+use log::info;
 use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
@@ -47,7 +48,9 @@ impl RehndaSettings {
         let mut data = String::new();
         file.read_to_string(&mut data).expect("Error reading settings file");
 
-        ron::from_str(&data).unwrap()
+        let settings = ron::from_str(&data).unwrap();
+        info!("Loaded settings: {:?}", settings);
+        settings
     }
 
     pub fn aspect_ratio(&self) -> f32 {

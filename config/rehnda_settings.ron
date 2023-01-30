@@ -1,15 +1,15 @@
 RehndaSettings(
     scene: RandomSpheres,
     output_file: Some("image.ppm"), // ppm extended file name to output to
-    num_samples: 64,
+    num_samples: 128,
     num_threads: None,  // None let's rehnda pick optimal
-    image_width: 600, // num pixels wide
+    image_width: 480, // num pixels wide
     max_depth: 30,
     camera_settings: (
         aspect_ratio: (
             width: 3.0,
             height: 2.0
         ),
-        aperture: 0.1,
+        aperture: 0.03,
     )
 )

@@ -34,6 +34,7 @@ mod image;
 mod material;
 mod scene;
 mod texture;
+mod util;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]

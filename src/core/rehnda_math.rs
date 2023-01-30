@@ -1,7 +1,7 @@
-use glam::{Vec3};
+use glam::{Vec3A};
 
-pub type Vec3f = Vec3;
-pub type Point3f = Vec3;
+pub type Vec3f = Vec3A;
+pub type Point3f = Vec3A;
 
 pub fn random_int_in_range(min: i32, max: i32) -> i32 {
     (min as f32 + rand::random::<f32>() * (max - min) as f32) as i32
@@ -26,7 +26,7 @@ pub trait Vec3Ext {
     fn refract(&self, normal: Vec3f, refraction_ratio: f32) -> Vec3f;
 }
 
-impl Vec3Ext for Vec3 {
+impl Vec3Ext for Vec3A {
     fn is_near_zero(&self) -> bool {
         const S: f32 = 1e-8f32;
         self.x.abs() < S && self.y.abs() < S && self.z.abs() < S
@@ -36,19 +36,19 @@ impl Vec3Ext for Vec3 {
         *self / self.length()
     }
 
-    fn random_vec_in_unit_disk() -> Vec3f {
+    fn random_vec_in_unit_sphere() -> Vec3f {
         loop {
-            let candidate = Vec3f::new(random_in_range(-1.0, 1.0), random_in_range(-1.0, 1.0), 0.0);
-            if candidate.length_squared() < 1.0 {
+            let candidate = Self::random_vec_in_range(-1f32, 1f32);
+            if candidate.length_squared() < 1f32 {
                 return candidate;
             }
         }
     }
 
-    fn random_vec_in_unit_sphere() -> Vec3f {
+    fn random_vec_in_unit_disk() -> Vec3f {
         loop {
-            let candidate = Self::random_vec_in_range(-1f32, 1f32);
-            if candidate.length_squared() < 1f32 {
+            let candidate = Vec3f::new(random_in_range(-1.0, 1.0), random_in_range(-1.0, 1.0), 0.0);
+            if candidate.length_squared() < 1.0 {
                 return candidate;
             }
         }

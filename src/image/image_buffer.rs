@@ -46,11 +46,7 @@ impl ImageBuffer {
         g = ImageBuffer::perform_gamma_correction(scale * g);
         b = ImageBuffer::perform_gamma_correction(scale * b);
 
-        ColorRgbF {
-            x: r,
-            y: g,
-            z: b
-        }
+        ColorRgbF::new(r, g, b)
     }
 
     fn perform_gamma_correction(value: f32) -> f32 {
