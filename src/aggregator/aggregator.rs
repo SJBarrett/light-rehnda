@@ -1,10 +1,9 @@
 use std::fmt::Write;
 use indicatif::{ProgressBar, ProgressState, ProgressStyle};
-use rand::seq::index::sample;
 
 use crate::core::color::ColorRgbF;
 use crate::core::ray::Ray;
-use crate::core::rehnda_math::{random_in_range, Vec3Ext};
+use crate::core::rehnda_math::random_in_range;
 use crate::image::image_buffer::ImageBuffer;
 use crate::scene::Scene;
 
@@ -19,15 +18,18 @@ fn sample_ray(ray: &Ray, scene: &Scene, depth: usize) -> ColorRgbF {
         return ColorRgbF::ZERO;
     }
 
-    if let Some(hit_result) = scene.world.hit(ray, 0.001, f32::MAX) {
+    return if let Some(hit_result) = scene.world.hit(ray, 0.001, f32::MAX) {
+        let emitted = hit_result.material.emitted(&hit_result.uv, &hit_result.hit_location);
         if let Some(scatter) = hit_result.material.scatter(ray, &hit_result) {
-            return scatter.attenuation * sample_ray(&scatter.scattered_ray, scene, depth - 1);
+            emitted + scatter.attenuation * sample_ray(&scatter.scattered_ray, scene, depth - 1)
+        } else {
+            // no scatter, so only return the emitted light
+            emitted
         }
+    } else {
+        // hit nothing in the world so return a background color
+        scene.background
     }
-
-    let unit_direction = ray.direction.unit_vector();
-    let t = 0.5 * (unit_direction.y + 1f32);
-    (1.0 - t) * ColorRgbF::splat(1.0) + t * ColorRgbF::new(0.5, 0.7, 1.0)
 }
 
 pub fn sample_pixels(aggregation_config: &AggregationConfig, scene: &Scene, out_image_buffer: &mut ImageBuffer, print_progress: bool) {

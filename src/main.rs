@@ -7,7 +7,6 @@ use log::info;
 
 use simplelog::*;
 use clap::Parser;
-use serde::de::Unexpected::Str;
 use crate::acceleration::bvh::BvhNode;
 use crate::aggregator::{AggregationConfig, sample_pixels};
 
@@ -88,51 +87,4 @@ fn spawn_render_thread(aggregation_config: AggregationConfig, scene: Scene, imag
         sample_pixels(&aggregation_config, &scene, &mut img_buffer, false);
         img_buffer
     })
-}
-
-fn test_scene() -> Scene {
-    let sphere_mat = Arc::new(LambertianMaterial {
-        texture: Arc::new(SolidTexture { albedo: ColorRgbF::new(0.7, 0.1, 0.7) }),
-    });
-    let metal_mat = Arc::new(MetalMaterial {
-        albedo: ColorRgbF::new(0.1, 0.6, 0.2),
-        fuzz: 0.0,
-    });
-    // TODO FIX DIELECTRIC
-    let dielectric_mat = Arc::new(DielectricMaterial {
-        refractive_index: 1.5,
-    });
-    let sphere_mat_2 = Arc::new(LambertianMaterial {
-        texture: Arc::new(SolidTexture { albedo: ColorRgbF::new(0.1, 0.6, 0.2) }),
-    });
-    let sphere_1 = Sphere {
-        centre: Point3f::new(0.0, -1000.0, 0.0),
-        radius: 1000.0,
-        material: sphere_mat,
-    };
-    let sphere_2 = Sphere {
-        centre: Point3f::new(0.0, 2.0, 0.0),
-        radius: 2.0,
-        material: dielectric_mat,
-    };
-    let objects: Vec<Arc<dyn Hittable>> = vec![Arc::new(sphere_1), Arc::new(sphere_2)];
-
-    let world = BvhNode::new(objects.as_slice(), 0, objects.len(), 0.0, 1.0);
-    let cam_create_info = CameraCreateInfo {
-        look_from: Point3f::new(13.0, 2.0, 3.0),
-        look_at: Point3f::splat(0.0),
-        up: Point3f::new(0.0, 1.0, 0.0),
-        vertical_fov_degrees: 20.0,
-        aspect_ratio: 16.0 / 9.0,
-        aperture: 0.1,
-        focus_distance: 10.0,
-        time_0: 0.0,
-        time_1: 1.0,
-    };
-    let camera = Camera::new(&cam_create_info);
-
-    Scene {
-        world: Arc::new(world),
-        camera,
-    }
 }

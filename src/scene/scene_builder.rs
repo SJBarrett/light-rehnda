@@ -6,7 +6,9 @@ use crate::core::color::ColorRgbF;
 use crate::core::rehnda_math::{Point3f, random_in_range, Vec3Ext};
 use crate::hittable::Hittable;
 use crate::hittable::sphere::Sphere;
+use crate::hittable::xy_rect::XyRect;
 use crate::material::dielectric::DielectricMaterial;
+use crate::material::diffuse_light::DiffuseLight;
 use crate::material::lambertian::LambertianMaterial;
 use crate::material::metal::MetalMaterial;
 use crate::scene::camera::{Camera, CameraCreateInfo};
@@ -17,12 +19,51 @@ use crate::texture::image::ImageTexture;
 use crate::texture::noise::NoiseTexture;
 use crate::texture::solid::SolidTexture;
 
+const DEFAULT_BACKGROUND: ColorRgbF = ColorRgbF::new(0.7, 0.8, 1.0);
+
 pub fn load_scene(settings: &RehndaSettings) -> Scene {
     match settings.scene {
         SceneName::RandomSpheres => random_spheres_scene(&settings.camera_settings),
         SceneName::ThreeSpheres => three_spheres_scene(&settings.camera_settings),
         SceneName::Globe => globe_scene(&settings.camera_settings),
+        SceneName::LightsDemo => lights_demo_scene(&settings.camera_settings),
         _ => unimplemented!("Unsupported scene name!")
+    }
+}
+
+fn lights_demo_scene(camera_settings: &CameraSettings) -> Scene {
+    let mut objects: Vec<Arc<dyn Hittable>> = Vec::new();
+    let perlin_texture = Arc::new(NoiseTexture { scale: 4.0 });
+    objects.push(Arc::new(Sphere {
+        centre: Point3f::new(0.0, -1000.0, 0.0),
+        radius: 1000.0,
+        material: Arc::new(LambertianMaterial::new(perlin_texture.clone())),
+    }));
+    objects.push(Arc::new(Sphere {
+        centre: Point3f::new(0.0, 2.0, 0.0),
+        radius: 2.0,
+        material: Arc::new(LambertianMaterial::new(perlin_texture)),
+    }));
+
+    let diff_light = Arc::new(DiffuseLight::new_solid_light(&ColorRgbF::new(4.0, 4.0, 4.0)));
+    objects.push(Arc::new(XyRect::new(3.0, 5.0, 1.0, 3.0, -2.0, diff_light)));
+
+    let cam_create_info = CameraCreateInfo {
+        look_from: Point3f::new(26.0, 3.0, 6.0),
+        look_at: Point3f::new(0.0, 2.0, 0.0),
+        up: Point3f::new(0.0, 1.0, 0.0),
+        vertical_fov_degrees: 20.0,
+        aspect_ratio: camera_settings.aspect_ratio(),
+        aperture: camera_settings.aperture,
+        focus_distance: 10.0,
+        time_0: 0.0,
+        time_1: 1.0,
+    };
+    let camera = Camera::new(&cam_create_info);
+    Scene {
+        world: Arc::new(BvhNode::new(objects.as_slice(), 0, objects.len(), 0.0, 1.0)),
+        camera,
+        background: ColorRgbF::ZERO,
     }
 }
 
@@ -50,6 +91,7 @@ fn globe_scene(camera_settings: &CameraSettings) -> Scene {
     Scene {
         world: Arc::new(BvhNode::new(slice::from_ref(&globe), 0, 1, 0.0, 1.0)),
         camera,
+        background: DEFAULT_BACKGROUND,
     }
 }
 
@@ -100,6 +142,7 @@ fn three_spheres_scene(camera_settings: &CameraSettings) -> Scene {
     Scene {
         world: Arc::new(BvhNode::new(objects.as_slice(), 0, objects.len(), 0.0, 1.0)),
         camera,
+        background: DEFAULT_BACKGROUND,
     }
 }
 
@@ -190,5 +233,6 @@ fn random_spheres_scene(camera_settings: &CameraSettings) -> Scene {
     Scene {
         world: Arc::new(BvhNode::new(objects.as_slice(), 0, objects.len(), 0.0, 1.0)),
         camera,
+        background: DEFAULT_BACKGROUND,
     }
 }

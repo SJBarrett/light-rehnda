@@ -1,6 +1,6 @@
 use crate::core::color::ColorRgbF;
 use crate::core::ray::Ray;
-use crate::core::rehnda_math::{random, random_in_range, Vec3Ext};
+use crate::core::rehnda_math::{random, Vec3Ext};
 use crate::hittable::HitResult;
 use crate::material::{Material, Scatter};
 

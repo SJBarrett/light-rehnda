@@ -36,12 +36,7 @@ impl Hittable for Sphere {
 
         let hit_location = ray.at(root);
         let outward_normal = (hit_location - self.centre) / self.radius;
-        let mut normal = outward_normal;
-        let mut front_face = true;
-        if ray.direction.dot(normal) > 0.0 {
-            normal = -normal;
-            front_face = false;
-        }
+        let (normal, front_face) = HitResult::is_hit_front_face(&ray.direction, &outward_normal);
 
         Some(HitResult {
             hit_location,

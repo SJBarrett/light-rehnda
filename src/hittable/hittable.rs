@@ -15,6 +15,19 @@ pub struct HitResult<'a> {
     pub material: &'a dyn Material
 }
 
+impl<'a> HitResult<'a> {
+    pub fn is_hit_front_face(incident_ray_dir: &Vec3f, outward_normal: &Vec3f) -> (Vec3f, bool) {
+        let mut normal = *outward_normal;
+        let mut front_face = true;
+        if incident_ray_dir.dot(normal) > 0.0 {
+            normal = -normal;
+            front_face = false;
+        }
+
+        (normal, front_face)
+    }
+}
+
 pub trait Hittable: Send + Sync {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitResult>;
 
