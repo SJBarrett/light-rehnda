@@ -1,5 +1,5 @@
 RehndaSettings(
-    scene: RandomSpheres,
+    scene: Globe,
     output_file: Some("image.ppm"), // ppm extended file name to output to
     num_samples: 128,
     num_threads: None,  // None let's rehnda pick optimal

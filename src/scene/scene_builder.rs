@@ -1,3 +1,5 @@
+use std::path::Path;
+use std::slice;
 use std::sync::Arc;
 use crate::acceleration::bvh::BvhNode;
 use crate::core::color::ColorRgbF;
@@ -11,6 +13,7 @@ use crate::scene::camera::{Camera, CameraCreateInfo};
 use crate::scene::Scene;
 use crate::scene::settings::{CameraSettings, RehndaSettings, SceneName};
 use crate::texture::checker::CheckerTexture;
+use crate::texture::image::ImageTexture;
 use crate::texture::noise::NoiseTexture;
 use crate::texture::solid::SolidTexture;
 
@@ -18,7 +21,35 @@ pub fn load_scene(settings: &RehndaSettings) -> Scene {
     match settings.scene {
         SceneName::RandomSpheres => random_spheres_scene(&settings.camera_settings),
         SceneName::ThreeSpheres => three_spheres_scene(&settings.camera_settings),
+        SceneName::Globe => globe_scene(&settings.camera_settings),
         _ => unimplemented!("Unsupported scene name!")
+    }
+}
+
+fn globe_scene(camera_settings: &CameraSettings) -> Scene {
+    let earth_texture = Arc::new(ImageTexture::new_from_image_file(Path::new("resources/earthmap.jpg")));
+    let earth_surface = Arc::new(LambertianMaterial::new(earth_texture));
+    let globe: Arc<dyn Hittable> = Arc::new(Sphere {
+        centre: Point3f::ZERO,
+        radius: 2.0,
+        material: earth_surface,
+    });
+
+    let cam_create_info = CameraCreateInfo {
+        look_from: Point3f::new(13.0, 2.0, 3.0),
+        look_at: Point3f::splat(0.0),
+        up: Point3f::new(0.0, 1.0, 0.0),
+        vertical_fov_degrees: 20.0,
+        aspect_ratio: camera_settings.aspect_ratio(),
+        aperture: camera_settings.aperture,
+        focus_distance: 10.0,
+        time_0: 0.0,
+        time_1: 1.0,
+    };
+    let camera = Camera::new(&cam_create_info);
+    Scene {
+        world: Arc::new(BvhNode::new(slice::from_ref(&globe), 0, 1, 0.0, 1.0)),
+        camera,
     }
 }
 

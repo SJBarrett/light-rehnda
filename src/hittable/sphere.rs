@@ -63,8 +63,8 @@ impl Hittable for Sphere {
 
 impl Sphere {
     fn get_unit_sphere_uv(surface_point: &Point3f) -> Uv {
-        let theta = -surface_point.y.acos();
-        let phi = -surface_point.z.atan2(surface_point.x) + PI;
-        Uv(phi / (2f32 * PI), theta / PI)
+        let theta = (-surface_point.y).acos();
+        let phi = (-surface_point.z).atan2(surface_point.x) + PI;
+        Uv::new(phi / (2f32 * PI), theta / PI)
     }
 }

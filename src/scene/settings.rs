@@ -22,6 +22,7 @@ pub struct RehndaSettings {
 pub enum SceneName {
     ThreeSpheres,
     RandomSpheres,
+    Globe,
 }
 
 #[derive(Clone, Deserialize, Debug)]
