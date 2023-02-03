@@ -1,15 +1,15 @@
 RehndaSettings(
-    scene: LightsDemo,
+    scene: CornellBox,
     output_file: Some("image.ppm"), // ppm extended file name to output to
-    num_samples: 1024,
+    num_samples: 512,
     num_threads: None,  // None let's rehnda pick optimal
     image_width: 480, // num pixels wide
     max_depth: 30,
     camera_settings: (
         aspect_ratio: (
-            width: 3.0,
-            height: 2.0
+            width: 1.0,
+            height: 1.0
         ),
-        aperture: 0.03,
+        aperture: 0.0,
     )
 )

@@ -24,6 +24,7 @@ pub enum SceneName {
     RandomSpheres,
     Globe,
     LightsDemo,
+    CornellBox,
 }
 
 #[derive(Clone, Deserialize, Debug)]
