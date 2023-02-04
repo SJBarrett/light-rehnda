@@ -12,7 +12,7 @@ pub struct BvhNode {
 }
 
 impl BvhNode {
-    pub fn new(src_objects: &[Arc<dyn Hittable>], start: usize, end: usize, time_0: f32, time_1: f32) -> BvhNode {
+    pub fn new(src_objects: &[Arc<dyn Hittable>], time_0: f32, time_1: f32) -> BvhNode {
         let mut objects = src_objects.to_vec();
 
         let split_axis = random_int_in_range(0, 2);
@@ -23,23 +23,25 @@ impl BvhNode {
             _ => unreachable!(),
         };
 
-        let objects_span = end - start;
+        let objects_span = src_objects.len();
         let (left, right) = match objects_span {
-            1 => (objects[start].clone(), objects[start].clone()),
+            1 => (objects[0].clone(), objects[0].clone()),
             2 => unsafe {
-                if comparator_func(objects.get_unchecked(start), objects.get_unchecked(start + 1)) == Ordering::Greater {
-                    (objects[start].clone(), objects[start + 1].clone())
+                if comparator_func(objects.get_unchecked(0), objects.get_unchecked(1)) == Ordering::Greater {
+                    (objects[0].clone(), objects[1].clone())
                 } else {
-                    (objects[start + 1].clone(), objects[start].clone())
+                    (objects[1].clone(), objects[0].clone())
                 }
             },
             _ => {
                 // TODO only sort slice
                 objects.sort_by(comparator_func);
-                let mid = start + objects_span / 2;
+                let mid = src_objects.len() / 2;
+                let left_slice = &objects[0..mid];
+                let right_slice = &objects[mid..objects_span];
                 (
-                    Arc::new(BvhNode::new(&objects, start, mid, time_0, time_1)) as Arc<dyn Hittable>,
-                    Arc::new(BvhNode::new(&objects, mid, end, time_0, time_1)) as Arc<dyn Hittable>
+                    Arc::new(BvhNode::new(left_slice, time_0, time_1)) as Arc<dyn Hittable>,
+                    Arc::new(BvhNode::new(right_slice, time_0, time_1)) as Arc<dyn Hittable>
                 )
             }
         };
@@ -53,7 +55,7 @@ impl BvhNode {
         BvhNode {
             left,
             right,
-            node_bounding_box: bounding_box
+            node_bounding_box: bounding_box,
         }
     }
 

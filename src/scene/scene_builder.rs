@@ -81,7 +81,7 @@ fn cornell_box(camera_settings: &CameraSettings) -> Scene {
     };
     let camera = Camera::new(&cam_create_info);
     Scene {
-        world: Arc::new(BvhNode::new(objects.as_slice(), 0, objects.len(), 0.0, 1.0)),
+        world: Arc::new(BvhNode::new(objects.as_slice(), 0.0, 1.0)),
         camera,
         background: ColorRgbF::ZERO,
     }
@@ -117,7 +117,7 @@ fn lights_demo_scene(camera_settings: &CameraSettings) -> Scene {
     };
     let camera = Camera::new(&cam_create_info);
     Scene {
-        world: Arc::new(BvhNode::new(objects.as_slice(), 0, objects.len(), 0.0, 1.0)),
+        world: Arc::new(BvhNode::new(objects.as_slice(), 0.0, 1.0)),
         camera,
         background: ColorRgbF::ZERO,
     }
@@ -145,7 +145,7 @@ fn globe_scene(camera_settings: &CameraSettings) -> Scene {
     };
     let camera = Camera::new(&cam_create_info);
     Scene {
-        world: Arc::new(BvhNode::new(slice::from_ref(&globe), 0, 1, 0.0, 1.0)),
+        world: Arc::new(BvhNode::new(slice::from_ref(&globe), 0.0, 1.0)),
         camera,
         background: DEFAULT_BACKGROUND,
     }
@@ -196,7 +196,7 @@ fn three_spheres_scene(camera_settings: &CameraSettings) -> Scene {
     let camera = Camera::new(&cam_create_info);
 
     Scene {
-        world: Arc::new(BvhNode::new(objects.as_slice(), 0, objects.len(), 0.0, 1.0)),
+        world: Arc::new(BvhNode::new(objects.as_slice(), 0.0, 1.0)),
         camera,
         background: DEFAULT_BACKGROUND,
     }
@@ -287,7 +287,7 @@ fn random_spheres_scene(camera_settings: &CameraSettings) -> Scene {
     };
     let camera = Camera::new(&cam_create_info);
     Scene {
-        world: Arc::new(BvhNode::new(objects.as_slice(), 0, objects.len(), 0.0, 1.0)),
+        world: Arc::new(BvhNode::new(objects.as_slice(), 0.0, 1.0)),
         camera,
         background: DEFAULT_BACKGROUND,
     }
