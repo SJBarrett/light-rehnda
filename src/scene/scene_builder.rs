@@ -3,10 +3,12 @@ use std::slice;
 use std::sync::Arc;
 use crate::acceleration::bvh::BvhNode;
 use crate::core::color::ColorRgbF;
-use crate::core::rehnda_math::{Point3f, random_in_range, Vec3Ext};
+use crate::core::rehnda_math::{Point3f, random_in_range, Vec3Ext, Vec3f};
 use crate::hittable::box_hittable::BoxHittable;
 use crate::hittable::Hittable;
+use crate::hittable::rotate_y::RotateY;
 use crate::hittable::sphere::Sphere;
+use crate::hittable::translate::Translate;
 use crate::hittable::xy_rect::XyRect;
 use crate::hittable::xz_rect::XzRect;
 use crate::hittable::yz_rect::YzRect;
@@ -50,8 +52,21 @@ fn cornell_box(camera_settings: &CameraSettings) -> Scene {
     objects.push(Arc::new(XzRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white.clone())));
     objects.push(Arc::new(XyRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white.clone())));
 
-    objects.push(Arc::new(BoxHittable::new(&Point3f::new(130.0, 0.0, 65.0), &Point3f::new(295.0, 165.0, 230.0), white.clone())));
-    objects.push(Arc::new(BoxHittable::new(&Point3f::new(265.0, 0.0, 295.0), &Point3f::new(430.0, 330.0, 460.0), white.clone())));
+    let box_1 = {
+        let mut box_t: Arc<dyn Hittable> = Arc::new(BoxHittable::new(&Point3f::new(0.0, 0.0, 0.0), &Point3f::new(165.0, 330.0, 165.0), white.clone()));
+        box_t = Arc::new(RotateY::new(box_t, 15.0));
+        box_t = Arc::new(Translate::new(box_t, &Vec3f::new(265.0, 0.0, 295.0)));
+        box_t
+    };
+    objects.push(box_1);
+
+    let box_2 = {
+        let mut box_t: Arc<dyn Hittable> = Arc::new(BoxHittable::new(&Point3f::new(0.0, 0.0, 0.0), &Point3f::new(165.0, 165.0, 165.0), white.clone()));
+        box_t = Arc::new(RotateY::new(box_t, -18.0));
+        box_t = Arc::new(Translate::new(box_t, &Vec3f::new(130.0, 0.0, 65.0)));
+        box_t
+    };
+    objects.push(box_2);
 
     let cam_create_info = CameraCreateInfo {
         look_from: Point3f::new(278.0, 278.0, -800.0),
