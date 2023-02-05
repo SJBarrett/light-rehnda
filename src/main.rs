@@ -1,29 +1,19 @@
 use std::path::Path;
-use std::sync::Arc;
 use std::thread;
 use std::thread::JoinHandle;
 use std::time::Instant;
-use log::info;
 
-use simplelog::*;
 use clap::Parser;
-use crate::acceleration::bvh::BvhNode;
-use crate::aggregator::{AggregationConfig, sample_pixels};
+use log::info;
+use simplelog::*;
 
-use crate::core::color::ColorRgbF;
-use crate::core::rehnda_math::Point3f;
+use crate::aggregator::{AggregationConfig, sample_pixels};
 use crate::hittable::Hittable;
-use crate::hittable::sphere::Sphere;
 use crate::image::image_buffer::ImageBuffer;
 use crate::image::image_writer::ImageFileWriter;
-use crate::material::dielectric::DielectricMaterial;
-use crate::material::lambertian::LambertianMaterial;
-use crate::material::metal::MetalMaterial;
-use crate::scene::camera::{Camera, CameraCreateInfo};
 use crate::scene::Scene;
 use crate::scene::scene_builder::load_scene;
 use crate::scene::settings::RehndaSettings;
-use crate::texture::solid::SolidTexture;
 
 mod acceleration;
 mod aggregator;
@@ -77,7 +67,8 @@ fn main() {
     let image_writer = ImageFileWriter {
         output_file_path: out_path,
     };
-    image_writer.write_image_buffer_to_ppm(&main_buffer, settings.num_samples_per_thread() * settings.num_threads()).unwrap();
+    // image_writer.write_image_buffer_to_ppm(&main_buffer, settings.num_samples_per_thread() * settings.num_threads()).unwrap();
+    image_writer.write_to_file(&main_buffer, settings.num_samples_per_thread() * settings.num_threads()).unwrap();
     info!("Done!");
 }
 
