@@ -5,6 +5,7 @@ use crate::acceleration::bvh::BvhNode;
 use crate::core::color::ColorRgbF;
 use crate::core::rehnda_math::{Point3f, random_in_range, Vec3Ext, Vec3f};
 use crate::hittable::box_hittable::BoxHittable;
+use crate::hittable::constant_medium::ConstantMedium;
 use crate::hittable::Hittable;
 use crate::hittable::rotate_y::RotateY;
 use crate::hittable::sphere::Sphere;
@@ -33,6 +34,7 @@ pub fn load_scene(settings: &RehndaSettings) -> Scene {
         SceneName::Globe => globe_scene(&settings.camera_settings),
         SceneName::LightsDemo => lights_demo_scene(&settings.camera_settings),
         SceneName::CornellBox => cornell_box(&settings.camera_settings),
+        SceneName::CornellSmoke => cornell_smoke(&settings.camera_settings),
         _ => unimplemented!("Unsupported scene name!")
     }
 }
@@ -67,6 +69,57 @@ fn cornell_box(camera_settings: &CameraSettings) -> Scene {
         box_t
     };
     objects.push(box_2);
+
+    let cam_create_info = CameraCreateInfo {
+        look_from: Point3f::new(278.0, 278.0, -800.0),
+        look_at: Point3f::new(278.0, 278.0, 0.0),
+        up: Point3f::new(0.0, 1.0, 0.0),
+        vertical_fov_degrees: 40.0,
+        aspect_ratio: camera_settings.aspect_ratio(),
+        aperture: camera_settings.aperture,
+        focus_distance: 10.0,
+        time_0: 0.0,
+        time_1: 1.0,
+    };
+    let camera = Camera::new(&cam_create_info);
+    Scene {
+        world: Arc::new(BvhNode::new(objects.as_slice(), 0.0, 1.0)),
+        camera,
+        background: ColorRgbF::ZERO,
+    }
+}
+
+
+fn cornell_smoke(camera_settings: &CameraSettings) -> Scene {
+    let mut objects: Vec<Arc<dyn Hittable>> = Vec::new();
+
+    let red = Arc::new(LambertianMaterial::new_with_solid_color(&ColorRgbF::new(0.65, 0.05, 0.05)));
+    let white = Arc::new(LambertianMaterial::new_with_solid_color(&ColorRgbF::new(0.73, 0.73, 0.73)));
+    let green = Arc::new(LambertianMaterial::new_with_solid_color(&ColorRgbF::new(0.12, 0.45, 0.15)));
+    let light = Arc::new(DiffuseLight::new_solid_light(&ColorRgbF::new(15.0, 15.0, 15.0)));
+
+    objects.push(Arc::new(YzRect::new(0.0, 555.0, 0.0, 555.0, 555.0, green)));
+    objects.push(Arc::new(YzRect::new(0.0, 555.0, 0.0, 555.0, 0.0, red)));
+    objects.push(Arc::new(XzRect::new(213.0, 343.0, 227.0, 332.0, 554.0, light)));
+    objects.push(Arc::new(XzRect::new(0.0, 555.0, 0.0, 555.0, 0.0, white.clone())));
+    objects.push(Arc::new(XzRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white.clone())));
+    objects.push(Arc::new(XyRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white.clone())));
+
+    let box_1 = {
+        let mut box_t: Arc<dyn Hittable> = Arc::new(BoxHittable::new(&Point3f::new(0.0, 0.0, 0.0), &Point3f::new(165.0, 330.0, 165.0), white.clone()));
+        box_t = Arc::new(RotateY::new(box_t, 15.0));
+        box_t = Arc::new(Translate::new(box_t, &Vec3f::new(265.0, 0.0, 295.0)));
+        box_t
+    };
+    objects.push(Arc::new(ConstantMedium::new_with_color(box_1, 0.01, &ColorRgbF::new(0.0, 0.0, 0.0))));
+
+    let box_2 = {
+        let mut box_t: Arc<dyn Hittable> = Arc::new(BoxHittable::new(&Point3f::new(0.0, 0.0, 0.0), &Point3f::new(165.0, 165.0, 165.0), white.clone()));
+        box_t = Arc::new(RotateY::new(box_t, -18.0));
+        box_t = Arc::new(Translate::new(box_t, &Vec3f::new(130.0, 0.0, 65.0)));
+        box_t
+    };
+    objects.push(Arc::new(ConstantMedium::new_with_color(box_2, 0.01, &ColorRgbF::new(1.0, 1.0, 1.0))));
 
     let cam_create_info = CameraCreateInfo {
         look_from: Point3f::new(278.0, 278.0, -800.0),

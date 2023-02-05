@@ -1,5 +1,5 @@
 RehndaSettings(
-    scene: CornellBox,
+    scene: CornellSmoke,
     output_file: Some("image.ppm"), // ppm extended file name to output to
     num_samples: 4096,
     num_threads: None,  // None let's rehnda pick optimal
