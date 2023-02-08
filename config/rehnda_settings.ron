@@ -1,10 +1,10 @@
 RehndaSettings(
-    scene: CornellSmoke,
-    output_file: Some("image.jpeg"), // ppm extended file name to output to
-    num_samples: 1028,
+    scene: CornellFeatureDemo,
+    output_file: Some("renders/feature_demo.jpeg"), // ppm extended file name to output to
+    num_samples: 8192,
     num_threads: None,  // None let's rehnda pick optimal
-    image_width: 400, // num pixels wide
-    max_depth: 30,
+    image_width: 600, // num pixels wide
+    max_depth: 15,
     camera_settings: (
         aspect_ratio: (
             width: 1.0,

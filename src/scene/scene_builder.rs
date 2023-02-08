@@ -1,3 +1,4 @@
+use std::iter::once;
 use std::path::Path;
 use std::slice;
 use std::sync::Arc;
@@ -35,7 +36,90 @@ pub fn load_scene(settings: &RehndaSettings) -> Scene {
         SceneName::LightsDemo => lights_demo_scene(&settings.camera_settings),
         SceneName::CornellBox => cornell_box(&settings.camera_settings),
         SceneName::CornellSmoke => cornell_smoke(&settings.camera_settings),
+        SceneName::CornellFeatureDemo => cornell_feature_demo(&settings.camera_settings),
         _ => unimplemented!("Unsupported scene name!")
+    }
+}
+
+
+fn cornell_feature_demo(camera_settings: &CameraSettings) -> Scene {
+    let mut objects: Vec<Arc<dyn Hittable>> = Vec::new();
+
+    let checker_texture = Arc::new(CheckerTexture::new(0.1, Arc::new(SolidTexture::new(0.2, 0.3, 0.1)), Arc::new(SolidTexture::new(0.9, 0.9, 0.9))));
+    let ground_material = Arc::new(LambertianMaterial::new(checker_texture));
+    let red = Arc::new(LambertianMaterial::new_with_solid_color(&ColorRgbF::new(0.65, 0.05, 0.05)));
+    let white = Arc::new(LambertianMaterial::new_with_solid_color(&ColorRgbF::new(0.73, 0.73, 0.73)));
+    let green = Arc::new(LambertianMaterial::new_with_solid_color(&ColorRgbF::new(0.12, 0.45, 0.15)));
+    let light = Arc::new(DiffuseLight::new_solid_light(&ColorRgbF::new(15.0, 15.0, 15.0)));
+
+    // walls
+    objects.push(Arc::new(YzRect::new(0.0, 555.0, 0.0, 555.0, 555.0, green)));
+    objects.push(Arc::new(YzRect::new(0.0, 555.0, 0.0, 555.0, 0.0, red)));
+    objects.push(Arc::new(XzRect::new(213.0, 343.0, 227.0, 332.0, 554.0, light)));
+    // floor
+    objects.push(Arc::new(XzRect::new(0.0, 555.0, 0.0, 555.0, 0.0, ground_material)));
+    objects.push(Arc::new(XzRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white.clone())));
+    objects.push(Arc::new(XyRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white.clone())));
+
+    // left box
+    let box_1 = {
+        let metal_mat = Arc::new(MetalMaterial { albedo: ColorRgbF::new(1.0, 1.0, 1.0), fuzz: 0.01 });
+        let mut box_t: Arc<dyn Hittable> = Arc::new(BoxHittable::new(&Point3f::new(0.0, 0.0, 0.0), &Point3f::new(165.0, 330.0, 165.0), metal_mat));
+        box_t = Arc::new(RotateY::new(box_t, 15.0));
+        box_t = Arc::new(Translate::new(box_t, &Vec3f::new(265.0, 0.0, 295.0)));
+        box_t
+    };
+    objects.push(box_1);
+
+    // right box
+    let box_2 = {
+        let mut box_t: Arc<dyn Hittable> = Arc::new(BoxHittable::new(&Point3f::new(0.0, 0.0, 0.0), &Point3f::new(165.0, 165.0, 165.0), white.clone()));
+        box_t = Arc::new(RotateY::new(box_t, -18.0));
+        box_t = Arc::new(Translate::new(box_t, &Vec3f::new(130.0, 0.0, 65.0)));
+        box_t
+    };
+    objects.push(box_2);
+
+    // glass sphere on right box
+    let sphere_mat = Arc::new(DielectricMaterial { refractive_index: 1.5 });
+    let glass_sphere = Arc::new(Sphere {
+        centre: Point3f::new(212.5, 200.0, 147.5),
+        radius: 35.0,
+        material:sphere_mat,
+    });
+    objects.push(glass_sphere);
+
+    // globe
+    let earth_texture = Arc::new(ImageTexture::new_from_image_file(Path::new("resources/earthmap.jpg")));
+    let earth_surface = Arc::new(LambertianMaterial::new(earth_texture));
+    let globe: Arc<dyn Hittable> = Arc::new(Sphere {
+        centre: Point3f::new(250.0, 70.0, 250.0),
+        radius: 70.0,
+        material: earth_surface,
+    });
+    objects.push(globe);
+
+    // fog floor
+    // let mut floor: Arc<dyn Hittable> = Arc::new(BoxHittable::new(&Point3f::new(0.0, 1.0, 0.0), &Point3f::new(555.0, 50.0, 555.0), white.clone()));
+    // floor = Arc::new(RotateY::new(floor, 45.0));
+    // objects.push(Arc::new(ConstantMedium::new_with_color(floor, 0.05, &ColorRgbF::new(0.8, 0.8, 0.8))));
+
+    let cam_create_info = CameraCreateInfo {
+        look_from: Point3f::new(278.0, 278.0, -800.0),
+        look_at: Point3f::new(278.0, 278.0, 0.0),
+        up: Point3f::new(0.0, 1.0, 0.0),
+        vertical_fov_degrees: 40.0,
+        aspect_ratio: camera_settings.aspect_ratio(),
+        aperture: camera_settings.aperture,
+        focus_distance: 10.0,
+        time_0: 0.0,
+        time_1: 1.0,
+    };
+    let camera = Camera::new(&cam_create_info);
+    Scene {
+        world: Arc::new(BvhNode::new(objects.as_slice(), 0.0, 1.0)),
+        camera,
+        background: ColorRgbF::ZERO,
     }
 }
 
@@ -207,7 +291,7 @@ fn globe_scene(camera_settings: &CameraSettings) -> Scene {
 fn three_spheres_scene(camera_settings: &CameraSettings) -> Scene {
     let mut objects: Vec<Arc<dyn Hittable>> = Vec::new();
 
-    let checker_texture = Arc::new(CheckerTexture::new(Arc::new(SolidTexture::new(0.2, 0.3, 0.1)), Arc::new(SolidTexture::new(0.9, 0.9, 0.9))));
+    let checker_texture = Arc::new(CheckerTexture::new(10.0, Arc::new(SolidTexture::new(0.2, 0.3, 0.1)), Arc::new(SolidTexture::new(0.9, 0.9, 0.9))));
     let ground_material = Arc::new(LambertianMaterial::new(checker_texture));
     let centre_material = Arc::new(LambertianMaterial::new_with_solid_color(&ColorRgbF::new(0.7, 0.3, 0.3)));
     let left_material = Arc::new(DielectricMaterial { refractive_index: 1.5 });
